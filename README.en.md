@@ -2,68 +2,69 @@
 
 **Language: [简体中文](README.md) | English**
 
-> **Status: Planning — not installable yet.** This repository does not currently contain a working AstrBot plugin. Real-device BLE interoperability, AstrBot APIs, and WebUI extension compatibility have not been validated. Do not treat it as a released health monitoring product.
+> **Status: Planning; not installable yet.** This repository does not yet contain a fully validated plugin or Android APK. The following are design targets, not claims of completed features.
 
-A planned native AstrBot plugin that receives heart-rate broadcasts over Windows Bluetooth Low Energy (BLE), enables authorized bot queries, and displays trends and history in the AstrBot WebUI.
+An AstrBot health-monitoring project for the **Xiaomi Smart Band 9**, with a confirmed **A+B dual-channel architecture**:
 
-## Planned features
+- **A — Live heart rate via Windows BLE:** The native Windows AstrBot plugin subscribes to heart-rate notifications while the band's heart-rate broadcast mode is enabled. The standard Heart Rate Service `0x180D` and Measurement characteristic `0x2A37` are the initial validation targets. Continuous collection, stale-data handling, and reconnection are planned.
+- **B — Historical health data via Android:** Keep the official Mi Fitness app unchanged. A separate **Android Companion**, without root access, reads authorized Health Connect records where actually shared and securely uploads them to AstrBot.
+- **Unified core:** SQLite, provenance-aware deduplication, historical statistics, a Chinese-only WebUI, and owner-only QQ/Bot queries. Either channel should fail independently.
 
-- **Continuous collection:** Automatically connect to the paired device when AstrBot starts, independent of chat requests or an open browser.
-- **Live dashboard:** Latest BPM, receive timestamp, connection status, and data freshness.
-- **History:** SQLite raw samples retained for **90 days**, longer-lived minute/hour summaries, and CSV export.
-- **WebUI:** Live dashboard, history and analysis, device management, and settings.
-- **Bilingual interface:** Planned Simplified Chinese and English support for the WebUI, settings labels, and bot responses, with automatic language selection and manual override.
-- **Bot integration:** Commands, authorized read-only AI tools, and chart responses.
-- **Privacy by default:** Only the explicitly configured owner's QQ user ID can query data; deny access if no owner is configured; no automatic group sharing.
-- **Reliability:** Reconnection, stale-data detection, lifecycle cleanup, and failure isolation from AstrBot and NapCat.
+## Language policy (finalized for V1.0)
 
-These are **requirements**, not implemented or verified features.
+- **AstrBot WebUI: Simplified Chinese only**. No UI language switch or English WebUI is required.
+- **GitHub-facing documentation: bilingual Chinese and English**, including paired READMEs and requirement specifications; installation, release, and contributor-facing documentation should have both languages when introduced.
+- Bot replies and plugin configuration labels default to Simplified Chinese; bilingual Bot/settings output is **not a V1.0 acceptance requirement**.
+- The Android Companion UI defaults to Chinese; an English Companion UI is optional for a later release and is not part of the GitHub documentation policy.
 
-## Planned V1.0 support
+## Planned V1.0 capabilities
 
-| Item | Scope |
+| Area | Target |
 | --- | --- |
-| Device | Xiaomi Smart Band 9 with heart-rate broadcast enabled |
-| Host | AstrBot running natively on Windows |
-| BLE | Standard Heart Rate Service (0x180D) and Measurement (0x2A37), subject to real-device verification |
-| Storage | Local SQLite |
-| Messaging | QQ/NapCat through AstrBot |
-| Docker, Linux, macOS | Not supported or guaranteed in V1.0 |
-| Other wearables | Untested; no compatibility claim |
+| Live heart rate | Windows BLE GATT notifications, continuous monitoring, staleness, reconnection |
+| Historical health | Android Companion, Health Connect, incremental sync, offline queue and retry |
+| Historical metrics | Steps, sleep, exercise, distance, energy, and exercise heart rate where Mi Fitness actually shares them |
+| Not guaranteed | Daily non-exercise heart rate, SpO2, stress, or any inaccessible Mi Fitness data |
+| Storage | SQLite; raw heart-rate samples retained for **90 days** |
+| WebUI | **Simplified Chinese only**: Overview, Live, History, Sync, Devices, Settings |
+| QQ / AI | Read-only queries by the explicitly bound owner in private chat, with server-side authorization |
+| Reliability | Channel isolation, lifecycle cleanup, retries, safe duplicate handling |
 
-**Note:** Finding the band in a BLE scan does not prove its GATT heart-rate notifications can be subscribed to. Actual firmware and hardware behavior must be tested.
+**Validation boundary:** A heart-rate broadcast option on the band does not by itself prove successful continuous Windows GATT notifications, simultaneous Mi Fitness connectivity, or long-term stability. Health Connect availability likewise does not establish that Mi Fitness shares every metric.
 
-## Privacy and data principles
+## Deliverables
 
-1. Server-side access control based on a configured QQ user ID; prefer private chats and do not expose personal measurements in group conversations by default.
-2. AI tools are strictly read-only and authorization-checked; no arbitrary database statements or device control.
-3. Never commit personal measurements, device identifiers, accounts, tokens, or local databases.
-4. Retain raw data for **90 days** by default. Generate aggregates before expiry. Missing data stays missing, not 0 BPM.
-5. Clearly distinguish fresh measurements, stale readings, and disconnection.
-6. For personal information only; not for diagnosis, emergency monitoring, or medical decisions.
+1. **Native AstrBot plugin:** One Windows BLE manager, an Android ingestion endpoint, SQLite, Chinese-only WebUI, Bot integration and access control.
+2. **Separate Android Companion APK:** Authorized reads, offline storage, active upload over protected connections; no root and no modification of Mi Fitness.
+3. **Reuse-first implementation:** Prefer Bleak and standard BLE APIs. Inspect upstream code and licenses before reusing; do not require an external Windows heart-rate desktop application or copy code with unclear permission.
+
+## Compatibility, privacy and safety
+
+- Initial device: Xiaomi Smart Band 9; channel A targets native Windows; channel B ingestion should not depend on Windows BLE.
+- No untested compatibility claims for other bands, firmware, or BLE acquisition on Linux/Docker.
+- Keep the database in AstrBot persistent storage, not in the repository.
+- Only the explicitly bound owner can retrieve health data via private Bot chat; deny by default until configured. Enforce WebUI/API permissions and separate Companion authentication with protected transport.
+- Missing or stale data must never be presented as live measurements.
+- Personal reference only; not for diagnosis or emergency medical monitoring.
 
 ## Roadmap
 
 | Phase | Goal | Status |
 | --- | --- | --- |
-| 0 | Validate AstrBot plugin APIs, Windows BLE, and Smart Band 9 broadcasts | Pending |
-| 1 | Plugin lifecycle and basic BLE collection | Not started |
-| 2 | Continuous collection, reconnection, SQLite, 90-day retention | Not started |
-| 3 | AstrBot WebUI dashboard and history | Not started |
-| 4 | Owner-only QQ commands and read-only AI tools | Not started |
-| 5 | Privacy, security, reload, and long-running validation | Not started |
-| 6 | Prepare AstrBot marketplace submission after acceptance | Not started |
+| 0 | Repository/licensing review, AstrBot API and device validation plan | Not accepted |
+| 1 | Windows BLE live collection and reconnection | Not started |
+| 2 | SQLite, lifecycle and retention | Not started |
+| 3 | Chinese-only WebUI and owner-only Bot | Not started |
+| 4 | Android Companion and Health Connect sync | Not started |
+| 5 | A+B integration, provenance and fault isolation | Not started |
+| 6 | 72-hour stability, security and release review | Not started |
 
-See the [English requirements](docs/REQUIREMENTS.en.md) for more detail.
+[中文需求规格](docs/REQUIREMENTS.zh-CN.md) · [Full English requirements](docs/REQUIREMENTS.en.md)
 
-## Installation
+## Installation and release
 
-**There is no installable release and this plugin is not listed in the AstrBot marketplace.** Do not install this repository as a finished plugin. Verified installation instructions, AstrBot compatibility, firmware requirements, and screenshots will be added after testing.
+**No verified installable release or marketplace listing is available yet.** Installation instructions and an Android APK will follow device, permission, reliability and compatibility validation.
 
-## Feedback
-
-Design proposals and compatibility reports are welcome via GitHub Issues. Redact QQ identifiers, tokens, BLE addresses, and personal heart-rate records from logs.
-
-## License
+Issues are welcome. Redact health records, QQ identifiers, BLE addresses and credentials from diagnostic material.
 
 [MIT License](LICENSE) © 2026 Polarzen
