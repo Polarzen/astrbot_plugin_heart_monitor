@@ -1,66 +1,70 @@
-# AstrBot Heart Monitor / AstrBot 心率监测插件
+# AstrBot Heart Monitor / AstrBot 健康监测插件
 
 **语言 / Language：简体中文 | [English](README.en.md)**
 
-> **项目状态：规划阶段（尚不可安装）。** 当前仓库不包含可运行的 AstrBot 插件。BLE 实机兼容性、AstrBot 插件 API 与 WebUI 扩展方式仍待验证。
+> **项目状态：规划阶段，尚不可安装。** 本仓库当前尚未提供完成实机验收的正式插件或 Android APK；以下均为目标规格，不代表功能已经实现。
 
-计划中的 AstrBot 原生插件：使用 Windows BLE 接收小米 Smart Band 9 心率广播，持续采集并保存数据，通过 AstrBot WebUI 展示图表，并允许绑定的本人 QQ 账号使用指令或 AI 查询。
+面向 **Xiaomi Smart Band 9** 的 AstrBot 健康监测项目。已确定采用 **A+B 双通道**：
 
-## 规划功能
+- **A — Windows BLE 实时心率**：在手环开启“心率广播”后，由原生 Windows 上的 AstrBot 插件直接订阅标准 BLE 心率通知（优先验证服务 `0x180D`、特征 `0x2A37`）；持续采集、断流提示、自动重连。
+- **B — Android 历史健康同步**：保留官方 Mi Fitness，通过用户授权的 Health Connect 和独立 **Android Companion** 获取实际可共享的步数、睡眠、运动等历史数据，并安全上传到 AstrBot。**无需 Root，也不修改 Mi Fitness**。
+- **统一核心**：SQLite、来源标记、去重、历史统计、中文 WebUI、本人专用 QQ/Bot 查询。一个通道失败不应影响另一个通道或 AstrBot/NapCat。
 
-- **持续采集**：AstrBot 启动后自动连接已绑定手环，无需打开网页或发送指令。
-- **实时心率**：BPM、通知时间、数据新鲜度与连接状态。
-- **历史记录**：SQLite 保存 90 天原始数据，生成分钟/小时摘要，支持 CSV 导出。
-- **WebUI 监测中心**：实时监测、历史分析、设备管理、插件设置。
-- **中英双语**：WebUI、插件配置说明、Bot 指令反馈均计划支持简体中文与英文；默认自动匹配语言，允许手动切换。
-- **Bot 查询**：固定指令、历史曲线图片及授权的 AI 只读工具。
-- **隐私优先**：仅显式绑定的本人 QQ 用户 ID 可查询，未绑定时默认拒绝；群聊不公开个人心率。
-- **稳定性**：蓝牙断线重连、超时检测、热重载资源清理；采集故障不影响 AstrBot/NapCat。
+## 语言范围（已确定）
 
-以上为**待实现的需求**，不是已经发布的功能。
+- **AstrBot WebUI：仅简体中文**；不开发中英文切换或双语界面。
+- **GitHub 对外材料：中文 + 英文**；保留成对 README、需求文档，后续面向贡献者的使用、安装、发布和接口文档也提供双语版本。
+- Bot 回复及插件配置提示默认中文；**不把 Bot/设置双语作为 V1.0 必达功能**。
+- Android Companion 的界面默认中文；是否追加英文 UI 由后续发布规划决定，**不属于 GitHub 文档双语要求**。
 
-## 首发兼容范围（计划）
+## V1.0 计划功能
 
-| 项目 | 计划范围 |
+| 模块 | 目标 |
 | --- | --- |
-| 心率设备 | 小米 Xiaomi Smart Band 9（需开启心率广播） |
-| 运行环境 | 原生 Windows 上运行的 AstrBot |
-| 通信方式 | BLE，优先验证标准心率服务 0x180D / 测量特征 0x2A37 |
-| 数据存储 | 本地 SQLite |
-| Bot 接入 | AstrBot 适配器下的 QQ/NapCat |
-| Docker、Linux、macOS | V1.0 暂不承诺支持 |
-| 其他手环/心率带 | 尚未验证，不宣称兼容 |
+| 实时心率 | Windows BLE 心率广播、持续采集、数据新鲜度、断流/离线、自动重连 |
+| 历史健康 | Android Companion + Health Connect 增量同步、离线队列、重试和补传 |
+| 可用历史指标 | 以 Mi Fitness 实际写入 Health Connect 的步数、睡眠、运动、距离、热量、运动心率为准 |
+| 暂不承诺指标 | 日常心率、血氧、压力等未确认的外部可读数据 |
+| 存储 | SQLite，原始心率保留 **90 天**；其他期限见需求规格 |
+| 中文 WebUI | 总览、实时监测、历史分析、同步中心、设备管理和设置 |
+| Bot / QQ | 仅绑定本人在私聊中查询；AI 只读工具再次校验权限 |
+| 可靠性 | 独立通道状态、断线恢复、热重载清理、数据去重与异常隔离 |
 
-**重要：** 能扫描到设备不等于能够读取心率通知。需以实际固件、GATT 服务发现和连续采集测试为准。
+**注意**：手环提供“心率广播”菜单不代表电脑已经通过连续通知验收；BLE GATT 订阅、与 Mi Fitness 同时连接、长时间运行必须实机验证。Android 上 Health Connect 的可读数据以真实授权和实际同步为准，不保证所有 Mi Fitness 指标可用。
 
-## 数据和隐私
+## 系统组成
 
-- 原始心率默认仅保留 **90 天**；分钟聚合建议保留 365 天，小时统计长期保留。
-- 无有效数据时显示缺失/过期/离线，不将历史值伪装为实时测量，不将缺失值填为 0 BPM。
-- 权限校验必须在 Bot、AI 工具和 WebUI API 的后端完成。
-- 个人心率数据、QQ 身份、设备地址和令牌不得提交到 GitHub 仓库。
-- 本项目面向个人参考，不作为医疗诊断或紧急监护工具。
+1. **AstrBot 原生插件**：唯一 Windows BLE 连接管理器、Android 数据接收接口、SQLite、中文 WebUI、Bot 查询与鉴权。
+2. **Android Companion APK（独立交付）**：读取获授权的健康记录，维护离线队列，主动经受保护连接上传。
+3. **开源复用**：优先使用 Bleak 与标准 BLE API，审查现有项目的源码和许可证后再决定复用，不需要外部 Windows 桌面程序；不得直接复制许可证不明的代码。
 
-## 开发路线
+## 兼容性及隐私
 
-| 阶段 | 工作 | 当前状态 |
+- 目标设备：Xiaomi Smart Band 9；通道 A 优先原生 Windows；通道 B 的数据接收部分不依赖 Windows BLE。
+- 其他手环、固件版本、Linux/Docker 的 BLE 采集不做未经验证的承诺。
+- 数据库使用 AstrBot 持久化目录，不进入仓库。
+- 仅已绑定本人可以通过 Bot 私聊访问健康数据；未绑定默认拒绝。WebUI/API 服务端鉴权、Companion 独立凭据、加密传输。
+- 没有数据时明确显示缺失/过期；不得将历史读数伪装为实时心率。
+- 仅供个人健康信息参考，不用于诊断或紧急医疗监护。
+
+## 开发与验收路线
+
+| 阶段 | 目标 | 状态 |
 | --- | --- | --- |
-| Phase 0 | 验证 Windows BLE、Smart Band 9 广播和 AstrBot 插件接口 | 待验证 |
-| Phase 1 | 插件生命周期与基础心率采集 | 未开始 |
-| Phase 2 | 后台持续采集、重连与 SQLite | 未开始 |
-| Phase 3 | WebUI 图表、历史记录与设备管理 | 未开始 |
-| Phase 4 | 仅本人 QQ 指令与 AI 只读工具 | 未开始 |
-| Phase 5 | 安全、隐私、24 小时稳定性和热重载验收 | 未开始 |
-| Phase 6 | 完成验收后提交 AstrBot 插件市场 | 未开始 |
+| Phase 0 | 仓库及开源许可审查、AstrBot API 和实机可行性验证计划 | 未验收 |
+| Phase 1 | Windows BLE 实际心率订阅、持续采集与重连 | 未开始 |
+| Phase 2 | SQLite、生命周期、保留策略 | 未开始 |
+| Phase 3 | 中文 WebUI、本人 Bot 查询 | 未开始 |
+| Phase 4 | Android Companion、Health Connect、离线同步 | 未开始 |
+| Phase 5 | A+B 数据整合、去重与异常隔离 | 未开始 |
+| Phase 6 | 72 小时测试、安全与发布验收 | 未开始 |
 
-[详细需求规格（中文）](docs/REQUIREMENTS.zh-CN.md) · [Requirements (English)](docs/REQUIREMENTS.en.md)
+[完整需求（中文）](docs/REQUIREMENTS.zh-CN.md) · [Full requirements (English)](docs/REQUIREMENTS.en.md)
 
-## 安装
+## 安装和发布
 
-**暂未提供可安装版本，也尚未上架 AstrBot 插件市场。** 完成实机测试和兼容性验收后将补充安装教程、支持版本、故障排查及界面截图。
+**目前尚无经过验证的可安装版本，也未声明已上架插件市场。** 待硬件、权限、稳定性与兼容性验收后提供插件及 Android APK。
 
-## 反馈与开源许可
-
-欢迎在 GitHub Issues 讨论功能及兼容性。提供日志时请去除 QQ ID、设备标识、凭证和心率数据。
+欢迎通过 Issues 提交不包含私人健康数据、QQ ID、设备地址和凭据的问题报告。
 
 [MIT License](LICENSE) © 2026 Polarzen
