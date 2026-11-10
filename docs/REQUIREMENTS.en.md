@@ -31,7 +31,13 @@ A single native AstrBot plugin owns exactly one BLE connection manager. The WebU
 - Authorize each management API server-side; collection continues when the WebUI is closed.
 - Validate supported plugin view APIs against the actual AstrBot installation; do not patch the Dashboard core.
 
-## QQ and AI
+## QQ and AI## Internationalization (i18n)
+- V1.0 must support Simplified Chinese (zh-CN) and English (en) for the WebUI, configuration labels, status messages, and bot responses.
+- WebUI defaults to the browser/AstrBot language and supports a persistent manual override, with a deterministic fallback for untranslated strings.
+- Bot responses use the configured language by default, with a preference for the authorized user.
+- Keep translations separate from data logic; localize date/number display without altering collection or storage.
+
+
 - Only a configured owner's QQ user ID can query. Deny by default when unconfigured.
 - Return private measurements in direct messages; do not post them to group chats by default.
 - Planned commands: current BPM, connection status, interval statistics, history, trend charts.
