@@ -12,6 +12,7 @@ A planned native AstrBot plugin that receives heart-rate broadcasts over Windows
 - **Live dashboard:** Latest BPM, receive timestamp, connection status, and data freshness.
 - **History:** SQLite raw samples retained for **90 days**, longer-lived minute/hour summaries, and CSV export.
 - **WebUI:** Live dashboard, history and analysis, device management, and settings.
+- **Bilingual interface:** Planned Simplified Chinese and English support for the WebUI, settings labels, and bot responses, with automatic language selection and manual override.
 - **Bot integration:** Commands, authorized read-only AI tools, and chart responses.
 - **Privacy by default:** Only the explicitly configured owner's QQ user ID can query data; deny access if no owner is configured; no automatic group sharing.
 - **Reliability:** Reconnection, stale-data detection, lifecycle cleanup, and failure isolation from AstrBot and NapCat.
