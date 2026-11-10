@@ -1,2 +1,65 @@
-# astrbot_plugin_heart_monitor
-AstrBot plugin for real-time BLE heart rate monitoring, featuring Xiaomi Smart Band 9 support, WebUI dashboards, historical analytics, and AI-powered queries.
+# AstrBot Heart Monitor / AstrBot 心率监测插件
+
+**语言 / Language：简体中文 | [English](README.en.md)**
+
+> **项目状态：规划阶段（尚不可安装）。** 当前仓库不包含可运行的 AstrBot 插件。BLE 实机兼容性、AstrBot 插件 API 与 WebUI 扩展方式仍待验证。
+
+计划中的 AstrBot 原生插件：使用 Windows BLE 接收小米 Smart Band 9 心率广播，持续采集并保存数据，通过 AstrBot WebUI 展示图表，并允许绑定的本人 QQ 账号使用指令或 AI 查询。
+
+## 规划功能
+
+- **持续采集**：AstrBot 启动后自动连接已绑定手环，无需打开网页或发送指令。
+- **实时心率**：BPM、通知时间、数据新鲜度与连接状态。
+- **历史记录**：SQLite 保存 90 天原始数据，生成分钟/小时摘要，支持 CSV 导出。
+- **WebUI 监测中心**：实时监测、历史分析、设备管理、插件设置。
+- **Bot 查询**：固定指令、历史曲线图片及授权的 AI 只读工具。
+- **隐私优先**：仅显式绑定的本人 QQ 用户 ID 可查询，未绑定时默认拒绝；群聊不公开个人心率。
+- **稳定性**：蓝牙断线重连、超时检测、热重载资源清理；采集故障不影响 AstrBot/NapCat。
+
+以上为**待实现的需求**，不是已经发布的功能。
+
+## 首发兼容范围（计划）
+
+| 项目 | 计划范围 |
+| --- | --- |
+| 心率设备 | 小米 Xiaomi Smart Band 9（需开启心率广播） |
+| 运行环境 | 原生 Windows 上运行的 AstrBot |
+| 通信方式 | BLE，优先验证标准心率服务 0x180D / 测量特征 0x2A37 |
+| 数据存储 | 本地 SQLite |
+| Bot 接入 | AstrBot 适配器下的 QQ/NapCat |
+| Docker、Linux、macOS | V1.0 暂不承诺支持 |
+| 其他手环/心率带 | 尚未验证，不宣称兼容 |
+
+**重要：** 能扫描到设备不等于能够读取心率通知。需以实际固件、GATT 服务发现和连续采集测试为准。
+
+## 数据和隐私
+
+- 原始心率默认仅保留 **90 天**；分钟聚合建议保留 365 天，小时统计长期保留。
+- 无有效数据时显示缺失/过期/离线，不将历史值伪装为实时测量，不将缺失值填为 0 BPM。
+- 权限校验必须在 Bot、AI 工具和 WebUI API 的后端完成。
+- 个人心率数据、QQ 身份、设备地址和令牌不得提交到 GitHub 仓库。
+- 本项目面向个人参考，不作为医疗诊断或紧急监护工具。
+
+## 开发路线
+
+| 阶段 | 工作 | 当前状态 |
+| --- | --- | --- |
+| Phase 0 | 验证 Windows BLE、Smart Band 9 广播和 AstrBot 插件接口 | 待验证 |
+| Phase 1 | 插件生命周期与基础心率采集 | 未开始 |
+| Phase 2 | 后台持续采集、重连与 SQLite | 未开始 |
+| Phase 3 | WebUI 图表、历史记录与设备管理 | 未开始 |
+| Phase 4 | 仅本人 QQ 指令与 AI 只读工具 | 未开始 |
+| Phase 5 | 安全、隐私、24 小时稳定性和热重载验收 | 未开始 |
+| Phase 6 | 完成验收后提交 AstrBot 插件市场 | 未开始 |
+
+[详细需求规格（中文）](docs/REQUIREMENTS.zh-CN.md) · [Requirements (English)](docs/REQUIREMENTS.en.md)
+
+## 安装
+
+**暂未提供可安装版本，也尚未上架 AstrBot 插件市场。** 完成实机测试和兼容性验收后将补充安装教程、支持版本、故障排查及界面截图。
+
+## 反馈与开源许可
+
+欢迎在 GitHub Issues 讨论功能及兼容性。提供日志时请去除 QQ ID、设备标识、凭证和心率数据。
+
+[MIT License](LICENSE) © 2026 Polarzen
